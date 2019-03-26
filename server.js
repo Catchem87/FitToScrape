@@ -43,7 +43,8 @@ app.get('/scrape', function(req, res) {
             result.title = $(this)
                 .text();
             result.link = $(this)
-                .attr('href');
+                .attr("href");
+            
 
             // create a new article using the 'result' object built from srcaping
             db.Article.create(result)
@@ -71,6 +72,24 @@ app.get('/articles', function(req, res) {
         })
         .catch(function(err) {
             res.json(err);
+        });
+});
+
+// route for getting notes
+app.get('/articles/:id', function(req, res) {
+    db.Article.findById(req.params.id)
+        .then(function(dbArticle) {
+            res.json(dbArticle);
+        });
+});
+
+app.post('/articles/:id', function(req, res) {
+    db.Article.findById(req.params.id)
+        .then(function(dbArticle) {
+            dbArticle.note.push({title: req.body.title, body: req.body.body});
+            dbArticle.save().then(function() {
+                res.status(200).end();
+            });
         });
 });
 

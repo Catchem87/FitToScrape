@@ -1,39 +1,37 @@
-import { threadId } from "worker_threads";
 
 // grab the articles as a JSON
 $.getJSON('/articles', function(data) {
     // for each one
     for (var i = 0; i < data.length; i ++) {
         //display the apropos information on the page
-        $('#articles').append("<p data-id='" + data[i]._id + "'>" + data[i].title + "<br />" + data[i].link + "</p>");
+        $('#articles').append("<p data-id='" + data[i]._id + "'<h4>" + data[i].title + "</h4><br /><a href='https://www.thestar.com" + data[i].link + "'>Link to Article</a></p>");
     }
 });
 
 // whenever someone clicks a p tag
 $(document).on('click', 'p', function() {
     // empty the notes from the note section
-    $('#notes').empty();
+    // $('#notes').empty();
     // save the id from the p tag
     var thisId = $(this).attr('data-id');
 
     // now make an axios call for the Article
-    axios.get('/articles/' + thisId).then(function(data) {
+    $.get('/articles/' + thisId).then(function(data) {
         console.log(data);
         // title of article
-        $('#notes').append("<h2>" + data.title + "</h2>");
+        $('#notes').html("<h4>" + data.title + "</h4>");
         // enter a new title
-        $('#notes').append("<input id='titleinput' name='title' >");
+        $('#notes').append("<input id='titleinput' name='title' placeholder='Title'>");
         // textarea to add new note body
-        $('#notes').append("<textarea id='bodyinput' name='body'></textarea>");
+        $('#notes').append("<textarea id='bodyinput' name='body'>Note</textarea>");
         // a button to submit a new note, with the id of the article saved to it
         $('#notes').append("<button data-id='" + data._id + "' id='savenote'>Save Note</button>");
 
         // if there's a note in the article
-        if (data.note) {
-            // place the title of the note in the title input
-            $('#titleinput').val(data.note.title);
-            // place the body of the note in the body textarea
-            $('#bodyinput').val(data.note.body);
+        for (var i = 0; i < data.note.length; i++) {
+            $('#notes').append("<br />" + data.note[i].title + "<br />");
+            
+
         }
     });
 });
@@ -44,7 +42,7 @@ $(document).on('click', '#savenote', function() {
     var thisId = $(this).attr("data-id");
 
     // run a post request to change the note, using what's entered in the inputs
-    axios.post('/articles/' + threadId, {
+    $.post('/articles/' + thisId, {
         title: $('#titleinput').val(),
         body: $('#bodyinput').val()
     }).then((res) => {
